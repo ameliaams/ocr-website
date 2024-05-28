@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kamera</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  </head>
+  <body>
+    <h1>Kamera</h1>
+    <div id="camera-feed">
+      <video id="video" width="400" height="300" autoplay></video>
+      <button id="snap-btn">Ambil Gambar</button>
+      <button id="save-btn" style="display: none">Simpan Hasil OCR</button>
+    </div>
+    <canvas id="canvas" width="400" height="300" style="display: none"></canvas>
+    <div id="hasil-ocr"></div>
+
+    <script>
+      var video = document.getElementById("video");
+      var snapButton = document.getElementById("snap-btn");
+      var saveButton = document.getElementById("save-btn");
+      var idBalita = window.location.pathname.split("/").pop(); // Ambil ID balita dari URL
+
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then(function (stream) {
+          video.srcObject = stream;
+          video.play();
+        })
+        .catch(function (err) {
+          console.log("An error occurred: " + err);
+        });
+
+      snapButton.addEventListener("click", function () {
+        var canvas = document.getElementById("canvas");
+        var context = canvas.getContext("2d");
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        video.pause();
+        snapButton.style.display = "none";
+        saveButton.style.display = "inline";
+        var image = canvas.toDataURL();
+
+        $.ajax({
+          type: "POST",
+          url: "/upload",
+          contentType: "application/json",
+          data: JSON.stringify({ image: image }),
+          success: function (response) {
+            document.getElementById("hasil-ocr").innerText = "Hasil OCR: " + response.text;
+          },
+          error: function (xhr, status, error) {
+            console.error("Error:", error);
+          },
+        });
+      });
+
+      saveButton.addEventListener("click", function () {
+        var hasilOCR = document.getElementById("hasil-ocr").innerText.replace("Hasil OCR: ", ""); // Menghapus "Hasil OCR: "
+
+        $.ajax({
+          type: "POST",
+          url: "/simpan-pengukuran",
+          data: JSON.stringify({ id_balita: idBalita, hasil_ocr: hasilOCR }),
+          contentType: "application/json",
+          success: function (response) {
+            alert("Hasil OCR berhasil disimpan!");
+            window.location.href = "/"; // Redirect kembali ke halaman index setelah menyimpan
+          },
+          error: function (xhr, status, error) {
+            console.error("Error:", error);
+          },
+        });
+      });
+    </script>
+  </body>
+</html>

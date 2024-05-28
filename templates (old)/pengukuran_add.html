@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SIPosyandu - Pengukuran</title>
+    <!-- Bootstrap -->
+    <link href="{{ url_for('static', filename='vendors/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{{ url_for('static', filename='vendors/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet">
+</head>
+<body class="nav-md">
+<div class="container body">
+    <div class="main_container">
+        <div class="col-md-3 left_col">
+            <div class="left_col scroll-view">
+                <div class="navbar nav_title" style="border: 0;">
+                    <a href="{{ url_for('index') }}" class="site_title"><i class="fa fa-stethoscope"></i> <span>SIPosyandu</span></a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <div class="right_col" role="main">
+            <div class="">
+                <div class="page-title">
+                    <div class="title_left">
+                        <h3>Pengukuran</h3>
+                    </div>
+                </div>
+                <div class="clearfix"></div>
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div class="x_panel">
+                            <div class="x_content">
+                                <form action="{{ url_for('pengukuran_add', id_balita=id_balita) }}" method="POST">
+                                    <div class="form-group">
+                                        <label for="kategori">Pilih Kategori Pengukuran:</label>
+                                        <select name="kategori" class="form-control" id="kategori">
+                                            <option value="berat_badan">Berat Badan</option>
+                                            <option value="tinggi_badan">Tinggi Badan</option>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Lanjutkan</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div class="pull-right">Sistem Informasi Posyandu - Penerapan OCR</div>
+            <div class="clearfix"></div>
+        </footer>
+    </div>
+</div>
+<!-- jQuery -->
+<script src="{{ url_for('static', filename='vendors/jquery/dist/jquery.min.js') }}"></script>
+<!-- Bootstrap -->
+<script src="{{ url_for('static', filename='vendors/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+</body>
+</html>
