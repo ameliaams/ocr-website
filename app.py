@@ -29,7 +29,8 @@ class Pengukuran(db.Model):
     id_pengukuran = db.Column(db.Integer, primary_key=True, autoincrement=True)
     id_balita = db.Column(db.Integer, nullable=False)
     nama_balita = db.Column(db.String(255), nullable=False)
-    berat_badan = db.Column(db.Float, nullable=False)
+    berat_badan = db.Column(db.Float, nullable=True)
+    tinggi_badan = db.Column(db.Float, nullable=True)
 
 # Inisialisasi Roboflow
 rf = Roboflow(api_key="Iiahj7wlNzkYVAtWGp2E")
@@ -63,27 +64,50 @@ def pengukuran_add(id_balita):
 def kamera(id_balita):
     if request.method == 'POST':
         hasil_ocr = request.form['hasil_ocr']
-        ocr = HasilOCR(id_balita=id_balita, hasil=hasil_ocr)
-        db.session.add(ocr)
-        db.session.commit()
+        kategori = request.form['kategori']
+        data = {'id_balita': id_balita, 'hasil_ocr': hasil_ocr, 'kategori': kategori}
+        simpan_pengukuran(data)
         return redirect(url_for('index'))
     return render_template('kamera.html', id_balita=id_balita)
 
 @app.route('/simpan-pengukuran', methods=['POST'])
-def simpan_pengukuran():
-    data = request.json
+def simpan_pengukuran(data=None):
+    if not data:
+        data = request.json
     id_balita = data['id_balita']
     hasil_ocr = data['hasil_ocr']
+    kategori = data['kategori']
 
-    # Ambil data balita berdasarkan ID
-    balita = Balita.query.get(id_balita)
-    if balita:
-        pengukuran = Pengukuran(id_balita=id_balita, nama_balita=balita.nama_balita, berat_badan=float(hasil_ocr))
-        db.session.add(pengukuran)
+    # Ambil data pengukuran berdasarkan ID balita
+    pengukuran = Pengukuran.query.filter_by(id_balita=id_balita).first()
+
+    if pengukuran:
+        # Update data pengukuran yang ada
+        if kategori == "berat_badan":
+            pengukuran.berat_badan = float(hasil_ocr)
+        elif kategori == "tinggi_badan":
+            pengukuran.tinggi_badan = float(hasil_ocr)
         db.session.commit()
-        return jsonify({'message': 'Data pengukuran berhasil disimpan!'}), 200
+        return jsonify({'message': 'Data pengukuran berhasil diperbarui!'}), 200
     else:
-        return jsonify({'message': 'Balita tidak ditemukan!'}), 404
+        # Buat entri baru jika belum ada
+        balita = Balita.query.get(id_balita)
+        if balita:
+            if kategori == "berat_badan":
+                pengukuran = Pengukuran(id_balita=id_balita, nama_balita=balita.nama_balita, berat_badan=float(hasil_ocr), tinggi_badan=None)
+            elif kategori == "tinggi_badan":
+                pengukuran = Pengukuran(id_balita=id_balita, nama_balita=balita.nama_balita, berat_badan=None, tinggi_badan=float(hasil_ocr))
+            db.session.add(pengukuran)
+            db.session.commit()
+            return jsonify({'message': 'Data pengukuran berhasil disimpan!'}), 200
+        else:
+            return jsonify({'message': 'Balita tidak ditemukan!'}), 404
+        
+@app.route('/pengukuran')
+def data_pengukuran():
+    # Ambil semua data pengukuran dari tabel
+    pengukuran_list = Pengukuran.query.all()
+    return render_template('pengukuran.html', pengukuran_list=pengukuran_list)
 
 @app.route('/upload', methods=['POST'])
 def upload():

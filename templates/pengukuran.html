@@ -1,27 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengukuran</title>
-</head>
-<body>
-    <h1>Pengukuran</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Data Pengukuran Balita</title>
+  </head>
+  <body>
+    <h1>Data Pengukuran Balita</h1>
     <table border="1">
-        <thead>
-            <tr>
-                <th>Nama Balita</th>
-                <th>Hasil OCR</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for hasil_ocr in hasil_ocr_list %}
-            <tr>
-                <td>{{ hasil_ocr.balita.nama_balita }}</td>
-                <td>{{ hasil_ocr.hasil }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
+      <thead>
+        <tr>
+          <th>Nama Balita</th>
+          <th>Berat Badan</th>
+          <th>Tinggi Badan</th>
+          <th>Lingkar Kepala</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for pengukuran in pengukuran_list %}
+        <tr>
+          <td>{{ pengukuran.nama_balita }}</td>
+          <td>{{ pengukuran.berat_badan }}</td>
+          <td>{{ pengukuran.tinggi_badan }}</td>
+          <td>{{ pengukuran.lingkar_kepala }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
-</body>
+  </body>
 </html>
