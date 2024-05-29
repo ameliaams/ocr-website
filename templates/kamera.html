@@ -1,43 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pengukuran dengan Kamera</title>
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SIPosyandu - Kamera</title>
+    <!-- Bootstrap -->
+    <link href="{{ url_for('static', filename='vendors/bootstrap/dist/css/bootstrap.min.css') }}" rel="stylesheet" />
+    <!-- Font Awesome -->
+    <link href="{{ url_for('static', filename='vendors/font-awesome/css/font-awesome.min.css') }}" rel="stylesheet" />
+    <!-- NProgress -->
+    <link href="{{ url_for('static', filename='vendors/nprogress/nprogress.css') }}" rel="stylesheet" />
+    <!-- Dropzone.js -->
+    <link href="{{ url_for('static', filename='vendors/dropzone/dist/min/dropzone.min.css') }}" rel="stylesheet" />
+    <!-- Custom Theme Style -->
+    <link href="{{ url_for('static', filename='build/css/custom.min.css') }}" rel="stylesheet" />
   </head>
-  <body>
-    <h1>Pengukuran dengan Kamera</h1>
-    <video id="video" width="640" height="480" autoplay></video>
-    <button id="snap">Ambil Gambar</button>
-    <canvas id="canvas" width="640" height="480"></canvas>
-    <form id="ocrForm" method="POST" action="/kamera/{{ id_balita }}">
-      <textarea id="hasil_ocr" name="hasil_ocr"></textarea>
-      <div>
-        <label><input type="radio" name="kategori" value="berat_badan" /> Berat Badan</label>
-        <label><input type="radio" name="kategori" value="tinggi_badan" /> Tinggi Badan</label>
+  <body class="nav-md">
+    <div class="container body">
+      <div class="main_container">
+        <div class="col-md-3 left_col">
+          <div class="left_col scroll-view">
+            <div class="navbar nav_title" style="border: 0">
+              <a href="{{ url_for('index') }}" class="site_title"><i class="fa fa-stethoscope"></i> <span>SIPosyandu</span></a>
+            </div>
+            <div class="clearfix"></div>
+            <ul class="nav side-menu">
+              <li class="{% if request.path == url_for('index') %}active{% endif %}">
+                <a href="{{ url_for('index') }}"><i class="fa fa-users"></i> Data Balita </a>
+              </li>
+              <li class="{% if request.path == url_for('pengukuran') %}active{% endif %}">
+                <a href="{{ url_for('pengukuran') }}"><i class="fa fa-folder"></i> Data Pengukuran </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        <div class="right_col" role="main">
+          <div class="">
+            <div class="page-title">
+              <div class="title_left">
+                <h3>Pengukuran</h3>
+              </div>
+            </div>
+            <div class="clearfix"></div>
+            <div class="row">
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                  <div class="x_content">
+                    <h1>Pengukuran dengan Kamera</h1>
+                    <div class="text-center">
+                      <video id="video" width="640" height="480" autoplay></video>
+                      <canvas id="canvas" width="640" height="480" style="display: none"></canvas>
+                      <br />
+                      <button id="snap" class="btn btn-success">Ambil Gambar</button>
+                      <button id="retry" class="btn btn-warning" style="display: none">Ulangi</button>
+                    </div>
+                    <form id="ocrForm" method="POST" action="/kamera/{{ id_balita }}" class="form-horizontal">
+                      <div class="form-group">
+                        <label for="hasil_ocr" class="control-label col-md-2">Hasil OCR:</label>
+                        <div class="col-md-10">
+                          <input type="text" class="form-control" id="hasil_ocr" name="hasil_ocr" required />
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <div class="col-md-12 text-center">
+                          <label class="radio-inline"><input type="radio" name="kategori" value="berat_badan" required /> Berat Badan</label>
+                          <label class="radio-inline"><input type="radio" name="kategori" value="tinggi_badan" required /> Tinggi Badan</label>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <div class="col-md-12 text-center">
+                          <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <footer>
+          <div class="pull-right">Sistem Informasi Posyandu - Penerapan OCR</div>
+          <div class="clearfix"></div>
+        </footer>
       </div>
-      <button type="submit">Simpan</button>
-    </form>
+    </div>
+    <!-- jQuery -->
+    <script src="{{ url_for('static', filename='vendors/jquery/dist/jquery.min.js') }}"></script>
+    <!-- Bootstrap -->
+    <script src="{{ url_for('static', filename='vendors/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+    <!-- FastClick -->
+    <script src="{{ url_for('static', filename='vendors/fastclick/lib/fastclick.js') }}"></script>
+    <!-- NProgress -->
+    <script src="{{ url_for('static', filename='vendors/nprogress/nprogress.js') }}"></script>
+    <!-- Dropzone.js -->
+    <script src="{{ url_for('static', filename='vendors/dropzone/dist/min/dropzone.min.js') }}"></script>
+    <!-- Custom Theme Scripts -->
+    <script src="{{ url_for('static', filename='build/js/custom.min.js') }}"></script>
+    <!-- OCR Script -->
     <script>
       // Access the camera and get the video element
       const video = document.getElementById("video");
       const canvas = document.getElementById("canvas");
       const context = canvas.getContext("2d");
       const snapButton = document.getElementById("snap");
+      const retryButton = document.getElementById("retry");
       const hasilOcrTextarea = document.getElementById("hasil_ocr");
 
-      navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then((stream) => {
-          video.srcObject = stream;
-        })
-        .catch((err) => {
-          console.error("Error accessing camera: ", err);
-        });
+      function startCamera() {
+        navigator.mediaDevices
+          .getUserMedia({ video: { facingMode: "environment" } }) // Use back camera on mobile
+          .then((stream) => {
+            video.srcObject = stream;
+            video.play();
+          })
+          .catch((err) => {
+            console.error("Error accessing camera: ", err);
+          });
+      }
 
       snapButton.addEventListener("click", () => {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL("image/png");
+
+        // Stop the video stream
+        video.pause();
+        video.srcObject.getTracks().forEach(track => track.stop());
+
+        snapButton.style.display = 'none';
+        retryButton.style.display = 'inline';
 
         fetch("/upload", {
           method: "POST",
@@ -54,6 +147,16 @@
             console.error("Error:", error);
           });
       });
+
+      retryButton.addEventListener("click", () => {
+        snapButton.style.display = 'inline';
+        retryButton.style.display = 'none';
+        hasilOcrTextarea.value = '';
+        startCamera();
+      });
+
+      // Start camera on page load
+      startCamera();
     </script>
   </body>
 </html>

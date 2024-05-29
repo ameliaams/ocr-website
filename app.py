@@ -29,8 +29,9 @@ class Pengukuran(db.Model):
     id_pengukuran = db.Column(db.Integer, primary_key=True, autoincrement=True)
     id_balita = db.Column(db.Integer, nullable=False)
     nama_balita = db.Column(db.String(255), nullable=False)
-    berat_badan = db.Column(db.Float, nullable=True)
-    tinggi_badan = db.Column(db.Float, nullable=True)
+    berat_badan = db.Column(db.Float, nullable=True, default=0.0)
+    tinggi_badan = db.Column(db.Float, nullable=True, default=0.0)
+    lingkar_kepala = db.Column(db.Float, nullable=True, default=0.0)
 
 # Inisialisasi Roboflow
 rf = Roboflow(api_key="Iiahj7wlNzkYVAtWGp2E")
@@ -56,8 +57,24 @@ def index():
 @app.route('/pengukuran_add/<int:id_balita>', methods=['GET', 'POST'])
 def pengukuran_add(id_balita):
     if request.method == 'POST':
-        kategori = request.form['kategori']
-        return redirect(url_for('kamera', id_balita=id_balita, kategori=kategori))
+        berat_badan = request.form['berat_badan']
+        tinggi_badan = request.form['tinggi_badan']
+        lingkar_kepala = request.form['lingkar_kepala']
+
+        balita = Balita.query.get(id_balita)
+        if balita:
+            pengukuran = Pengukuran(
+                id_balita=id_balita,
+                nama_balita=balita.nama_balita,
+                berat_badan=float(berat_badan),
+                tinggi_badan=float(tinggi_badan),
+                lingkar_kepala=float(lingkar_kepala)
+            )
+            db.session.add(pengukuran)
+            db.session.commit()
+            return redirect(url_for('pengukuran'))
+        else:
+            return "Balita tidak ditemukan", 404
     return render_template('pengukuran_add.html', id_balita=id_balita)
 
 @app.route('/kamera/<int:id_balita>', methods=['GET', 'POST'])
@@ -67,7 +84,7 @@ def kamera(id_balita):
         kategori = request.form['kategori']
         data = {'id_balita': id_balita, 'hasil_ocr': hasil_ocr, 'kategori': kategori}
         simpan_pengukuran(data)
-        return redirect(url_for('index'))
+        return redirect(url_for('pengukuran'))
     return render_template('kamera.html', id_balita=id_balita)
 
 @app.route('/simpan-pengukuran', methods=['POST'])
@@ -104,9 +121,16 @@ def simpan_pengukuran(data=None):
             return jsonify({'message': 'Balita tidak ditemukan!'}), 404
         
 @app.route('/pengukuran')
-def data_pengukuran():
+def pengukuran():
     # Ambil semua data pengukuran dari tabel
     pengukuran_list = Pengukuran.query.all()
+    for pengukuran in pengukuran_list:
+        if pengukuran.berat_badan is None:
+            pengukuran.berat_badan = 0.0
+        if pengukuran.tinggi_badan is None:
+            pengukuran.tinggi_badan = 0.0
+        if pengukuran.lingkar_kepala is None:
+            pengukuran.lingkar_kepala = 0.0
     return render_template('pengukuran.html', pengukuran_list=pengukuran_list)
 
 @app.route('/upload', methods=['POST'])
