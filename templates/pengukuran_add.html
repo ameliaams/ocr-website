@@ -87,15 +87,15 @@
                     <form action="{{ url_for('pengukuran_add', id_balita=id_balita) }}" method="POST">
                       <div class="form-group">
                         <label for="berat_badan">Berat Badan (kg):</label>
-                        <input type="number" step="0.01" name="berat_badan" class="form-control" required />
+                        <input type="number" step="0.01" name="berat_badan" class="form-control" />
                       </div>
                       <div class="form-group">
                         <label for="tinggi_badan">Tinggi Badan (cm):</label>
-                        <input type="number" step="0.01" name="tinggi_badan" class="form-control" required />
+                        <input type="number" step="0.01" name="tinggi_badan" class="form-control" />
                       </div>
                       <div class="form-group">
                         <label for="lingkar_kepala">Lingkar Kepala (cm):</label>
-                        <input type="number" step="0.01" name="lingkar_kepala" class="form-control" required />
+                        <input type="number" step="0.01" name="lingkar_kepala" class="form-control" />
                       </div>
                       <button type="submit" class="btn btn-primary">Simpan</button>
                     </form>
